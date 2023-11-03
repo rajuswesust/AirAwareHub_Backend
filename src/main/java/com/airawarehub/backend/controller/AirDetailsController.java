@@ -47,8 +47,8 @@ public class AirDetailsController {
     }
 
     @GetMapping("/search-city")
-    public ResponseEntity<?> searchByCity(@RequestBody CitySearchDto citySearchDto) {
-        return  new ResponseEntity<>(airService.searchByCityPrefix(citySearchDto.getCityName().toLowerCase()), HttpStatus.OK);
+    public ResponseEntity<?> searchByCity(@RequestParam(value = "city_name") String cityName) {
+        return  new ResponseEntity<>(airService.searchByCityPrefix(cityName.toLowerCase()), HttpStatus.OK);
     }
     @GetMapping("/all-states")
     public ResponseEntity<?> getAllState() {
