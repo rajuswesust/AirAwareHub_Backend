@@ -1,10 +1,8 @@
 package com.airawarehub.backend.service.impl;
 
 import com.airawarehub.backend.entity.*;
-import com.airawarehub.backend.payload.AirQualityDto;
-import com.airawarehub.backend.payload.CityAirRequestDto;
-import com.airawarehub.backend.payload.RankCityResponse;
-import com.airawarehub.backend.payload.SimplifiedAirQualityDTO;
+import com.airawarehub.backend.exception.ResponseStatusExceptionCustom;
+import com.airawarehub.backend.payload.*;
 import com.airawarehub.backend.repository.*;
 import com.airawarehub.backend.service.AirService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -64,9 +62,9 @@ public class AirServiceImpl implements AirService {
         }
         catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Exception while calling endpoint of IQAir API for data", e);
+            throw new ResponseStatusExceptionCustom(
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").
+                            statusCode(HttpStatusCode.valueOf(500).value()).build());
         }
     }
 
@@ -86,9 +84,9 @@ public class AirServiceImpl implements AirService {
         }
         catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Exception while calling endpoint of IQAir API for data", e);
+            throw new ResponseStatusExceptionCustom(
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").
+                            statusCode(HttpStatusCode.valueOf(500).value()).build());
         }
     }
 
@@ -122,9 +120,9 @@ public class AirServiceImpl implements AirService {
         }
         catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Exception while calling endpoint of IQAir API for data", e);
+            throw new ResponseStatusExceptionCustom(
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").
+                            statusCode(HttpStatusCode.valueOf(500).value()).build());
         }
     }
 

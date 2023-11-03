@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -75,6 +76,14 @@ public class RestControllerExceptionHandler {
         SimpleResponse simpleResponse = exception.getSimpleResponse();
         return new ResponseEntity<>(simpleResponse, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(ResponseStatusExceptionCustom.class)
+    @ResponseBody
+    public ResponseEntity<SimpleResponse> resolveException(ResponseStatusExceptionCustom exception) {
+        SimpleResponse simpleResponse = exception.getSimpleResponse();
+        return new ResponseEntity<>(simpleResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseBody
