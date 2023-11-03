@@ -11,7 +11,7 @@ public interface AirService {
 
     public Object getStatesByCountry(String countryName);
 
-    Object getCityAirData(CityAirRequestDto cityAirRequestDto);
+    Object getCityAirData(String city, String state, String country);
 
     List<RankCityResponse> getPollutedCity();
 

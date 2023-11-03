@@ -93,10 +93,10 @@ public class AirServiceImpl implements AirService {
     }
 
     @Override
-    public Object getCityAirData(CityAirRequestDto cityAirRequestDto) {
+    public Object getCityAirData(String city, String state, String country) {
         try {
-            String urlCity = url.append("city?").append("city=").append(cityAirRequestDto.getCity()).
-                    append("&state=").append(cityAirRequestDto.getState()).append("&country=").append(cityAirRequestDto.getCountry()).append("&key=").append(apiKey).toString();
+            String urlCity = url.append("city?").append("city=").append(city).
+                    append("&state=").append(state).append("&country=").append(country).append("&key=").append(apiKey).toString();
             HttpHeaders headers = new HttpHeaders();
 
             // Make a GET call to IQAir

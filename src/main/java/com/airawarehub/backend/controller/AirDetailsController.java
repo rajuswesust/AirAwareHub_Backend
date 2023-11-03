@@ -32,8 +32,10 @@ public class AirDetailsController {
     }
 
     @GetMapping("/city")
-    public ResponseEntity<?> getCityAirData(@RequestBody CityAirRequestDto cityAirRequestDto) {
-        return new ResponseEntity<>(airService.getCityAirData(cityAirRequestDto), HttpStatus.OK);
+    public ResponseEntity<?> getCityAirData(@RequestParam(value = "city") String city,
+                                            @RequestParam(value = "state") String state,
+                                            @RequestParam(value = "country") String country) {
+        return new ResponseEntity<>(airService.getCityAirData(city, state, country), HttpStatus.OK);
     }
 
     @GetMapping("/top-10-polluted-city")
