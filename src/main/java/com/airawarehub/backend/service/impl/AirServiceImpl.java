@@ -181,8 +181,8 @@ public class AirServiceImpl implements AirService {
     }
 
     @Override
-    public List<City> searchByCityPrefix(String cityName) {
-        return cityRepository.findByNameStartingWith(cityName);
+    public List<City> searchByCity(String cityName) {
+        return cityRepository.findCitiesByNameContaining(cityName);
     }
 
     private void saveStates(JsonNode responseBody, String countryName) {

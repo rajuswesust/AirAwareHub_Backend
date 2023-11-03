@@ -19,5 +19,7 @@ public interface AirService {
 
     public void getAllStates();
 
-    List<City> searchByCityPrefix(String cityName);
+    //List<City> searchByCityPrefix(String cityName);
+
+    List<City> searchByCity(String name);
 }
