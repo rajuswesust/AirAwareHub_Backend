@@ -1,6 +1,8 @@
 package com.airawarehub.backend.service.impl;
 
 import com.airawarehub.backend.entity.*;
+import com.airawarehub.backend.exception.ApiException;
+import com.airawarehub.backend.exception.BadRequestException;
 import com.airawarehub.backend.exception.ResponseStatusExceptionCustom;
 import com.airawarehub.backend.payload.*;
 import com.airawarehub.backend.repository.*;
@@ -14,6 +16,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -46,10 +49,9 @@ public class AirServiceImpl implements AirService {
     private String apiKey;
 
 
-
     @Override
     public Object getCountries() {
-        try{
+        try {
             String urlCountries = url.append("countries?key=").append(apiKey).toString();
             HttpHeaders headers = new HttpHeaders();
 
@@ -59,12 +61,12 @@ public class AirServiceImpl implements AirService {
             log.info("Output form API:{}", response.getBody());
             saveCountries(Objects.requireNonNull(response.getBody()));
             return response.getBody();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
+            if (e instanceof HttpClientErrorException)
+                handleHttpClientError((HttpClientErrorException) e);
             throw new ResponseStatusExceptionCustom(
-                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").
-                            statusCode(HttpStatusCode.valueOf(500).value()).build());
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").build());
         }
     }
 
@@ -81,12 +83,12 @@ public class AirServiceImpl implements AirService {
             log.info("Output form API:{}", response.getBody());
             saveStates(Objects.requireNonNull(response.getBody()), countryName);
             return response.getBody();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
+            if (e instanceof HttpClientErrorException)
+                handleHttpClientError((HttpClientErrorException) e);
             throw new ResponseStatusExceptionCustom(
-                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").
-                            statusCode(HttpStatusCode.valueOf(500).value()).build());
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").build());
         }
     }
 
@@ -104,7 +106,7 @@ public class AirServiceImpl implements AirService {
 
             String responseBody = response.getBody();
             ObjectMapper objectMapper = new ObjectMapper();
-           AirQualityDto airQualityDto = objectMapper.readValue(responseBody, AirQualityDto.class);
+            AirQualityDto airQualityDto = objectMapper.readValue(responseBody, AirQualityDto.class);
 
             SimplifiedAirQualityDTO simplifiedAirQualityDTO = SimplifiedAirQualityDTO.builder().
                     city(airQualityDto.getData().getCity()).
@@ -117,12 +119,13 @@ public class AirServiceImpl implements AirService {
                     build();
 
             return simplifiedAirQualityDTO;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
+            if (e instanceof HttpClientErrorException)
+                handleHttpClientError((HttpClientErrorException) e);
             throw new ResponseStatusExceptionCustom(
                     SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").
-                            statusCode(HttpStatusCode.valueOf(500).value()).build());
+                            statusCode(500).build());
         }
     }
 
@@ -130,7 +133,7 @@ public class AirServiceImpl implements AirService {
     public List<RankCityResponse> getPollutedCity() {
         List<PollutedCity> pollutedCities = pollutedCityRepository.findAll();
         List<RankCityResponse> pollutedCitiesList = new ArrayList<>();
-        for(PollutedCity it: pollutedCities) {
+        for (PollutedCity it : pollutedCities) {
             StringBuilder temporaryUrl = new StringBuilder(url);
             String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
                     append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
@@ -151,7 +154,7 @@ public class AirServiceImpl implements AirService {
     public List<RankCityResponse> getCleanCity() {
         List<CleanCity> pollutedCities = cleanCityRepository.findAll();
         List<RankCityResponse> cleanCitiesList = new ArrayList<>();
-        for(CleanCity it: pollutedCities) {
+        for (CleanCity it : pollutedCities) {
             StringBuilder temporaryUrl = new StringBuilder(url);
             String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
                     append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
@@ -171,10 +174,10 @@ public class AirServiceImpl implements AirService {
     public void getAllStates() {
         List<Country> countries = countryRepository.findAll();
         int cnt = 0;
-        for(Country country: countries) {
-           getStatesByCountry(country.getName());
-           cnt++;
-           if(cnt == 50) break;
+        for (Country country : countries) {
+            getStatesByCountry(country.getName());
+            cnt++;
+            if (cnt == 50) break;
         }
     }
 
@@ -203,8 +206,19 @@ public class AirServiceImpl implements AirService {
             countires.add(Country.builder().name(countryName).build());
         }
         System.out.println("size of list: " + countires.size());
-       countryRepository.saveAll(countires);
+        countryRepository.saveAll(countires);
     }
 
+
+    private Object handleHttpClientError(HttpClientErrorException e) {
+        HttpStatus statusCode = HttpStatus.resolve(e.getRawStatusCode());
+        JsonNode jsonNode = e.getResponseBodyAs(JsonNode.class);
+
+        if (statusCode == HttpStatus.BAD_REQUEST) {
+            throw new BadRequestException(SimpleResponse.builder().message(jsonNode.get("data").get("message").textValue()).statusCode(400).build());
+        } else {
+            throw new ApiException(statusCode, jsonNode.get("message").textValue());
+        }
+    }
 
 }
