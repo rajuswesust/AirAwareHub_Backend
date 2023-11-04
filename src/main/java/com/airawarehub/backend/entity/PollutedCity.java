@@ -17,5 +17,6 @@ public class PollutedCity {
     private String name;
     private String country;
     private String state;
-
+    private int aqius;
+    private int aqicn;
 }
