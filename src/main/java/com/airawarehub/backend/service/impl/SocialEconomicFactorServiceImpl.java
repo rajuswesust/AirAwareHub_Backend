@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 @Service
@@ -51,9 +52,15 @@ public class SocialEconomicFactorServiceImpl implements SocialEconomicFactorServ
                     HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
             log.info("Output form API:{}", response.getBody());
 
-            JsonNode data = response.getBody().get(1).get(1);
+            JsonNode data = response.getBody().get(1).get(0);
 
-            GdpTotalResponse gdpTotalResponse = GdpTotalResponse.builder().value(data.get("value").asDouble()).
+            double value = Double.parseDouble(String.valueOf(data.get("value")));
+
+            // Format it to remove scientific notation
+            DecimalFormat decimalFormat = new DecimalFormat("0.##########"); // Adjust the number of # symbols as needed
+            String formattedValue = decimalFormat.format(value);
+
+            GdpTotalResponse gdpTotalResponse = GdpTotalResponse.builder().value(formattedValue).
                     date(data.get("date").textValue()).build();
             return gdpTotalResponse;
 

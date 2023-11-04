@@ -22,5 +22,9 @@ public class SocialEconomicFactorsController {
         return new ResponseEntity<>(socialEconomicFactorService.getTotalGdp(countryName), HttpStatus.OK);
     }
 
+    @GetMapping("/total-population/{countryName}")
+    public ResponseEntity<GdpTotalResponse> getTotalPopulation(@PathVariable(value = "countryName") String countryName) {
+        return new ResponseEntity<>(socialEconomicFactorService.getTotalGdp(countryName), HttpStatus.OK);
+    }
 
 }

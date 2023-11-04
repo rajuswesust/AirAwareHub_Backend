@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class GdpTotalResponse {
-    public Double value;
+    public String value;
     public String date;
 }
