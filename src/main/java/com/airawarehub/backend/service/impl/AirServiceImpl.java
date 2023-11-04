@@ -164,20 +164,20 @@ public class AirServiceImpl implements AirService {
             List<CleanCity> pollutedCities = cleanCityRepository.findAll();
             List<RankCityResponse> cleanCitiesList = new ArrayList<>();
             for (CleanCity it : pollutedCities) {
-                StringBuilder temporaryUrl = new StringBuilder(url);
-                String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
-                        append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
-                HttpHeaders headers = new HttpHeaders();
+//                StringBuilder temporaryUrl = new StringBuilder(url);
+//                String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
+//                        append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
+//                HttpHeaders headers = new HttpHeaders();
+//
+//                ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
+//                        HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
 
-                ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
-                        HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
-
-                int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
-                int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
-                it.setAqicn(aqicn);
-                it.setAqius(aqius);
-                cleanCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
-                System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+                //int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
+                //int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
+                //it.setAqicn(aqicn);
+                //it.setAqius(aqius);
+                cleanCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(it.getAqius()).aqicn(it.getAqicn()).build());
+                //System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
             }
             return cleanCitiesList;
         } catch (Exception e) {
