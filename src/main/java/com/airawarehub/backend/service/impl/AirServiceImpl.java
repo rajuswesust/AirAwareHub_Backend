@@ -41,6 +41,7 @@ public class AirServiceImpl implements AirService {
     private final PollutedCityRepository pollutedCityRepository;
     private final CleanCityRepository cleanCityRepository;
     private final CityRepository cityRepository;
+    private final CityAirDataRepository cityAirDataRepository;
 
     @Value("${iqair.api.base.url}")
     private StringBuilder url;
@@ -94,6 +95,9 @@ public class AirServiceImpl implements AirService {
 
     @Override
     public Object getCityAirData(String city, String state, String country) {
+        if(cityAirDataRepository.existsByCity(city)) {
+            return convert(cityAirDataRepository.findByCity(city));
+        }
         try {
             String urlCity = url.append("city?").append("city=").append(city).
                     append("&state=").append(state).append("&country=").append(country).append("&key=").append(apiKey).toString();
@@ -117,7 +121,7 @@ public class AirServiceImpl implements AirService {
                     weather(airQualityDto.getData().getCurrent().getWeather()).
                     pollution(airQualityDto.getData().getCurrent().getPollution()).
                     build();
-
+            saveCityAirData(simplifiedAirQualityDTO);
             return simplifiedAirQualityDTO;
         } catch (Exception e) {
             log.error("Something went wrong while getting value from IQAir API", e);
@@ -129,24 +133,67 @@ public class AirServiceImpl implements AirService {
         }
     }
 
+    private void saveCityAirData(SimplifiedAirQualityDTO simplifiedAirQualityDTO) {
+        String lat = String.valueOf(simplifiedAirQualityDTO.getCoordinates()[0]);
+        String lng = String.valueOf(simplifiedAirQualityDTO.getCoordinates()[1]);
+       CityAirData cityAirData  = CityAirData.builder().city(simplifiedAirQualityDTO.getCity()).country(simplifiedAirQualityDTO.getCountry()).state(simplifiedAirQualityDTO.getState()).
+                lat(lat).lng(lng).mainus(simplifiedAirQualityDTO.getPollution().getMainus()).maincn(simplifiedAirQualityDTO.getPollution().getMaincn()).
+                aqius(simplifiedAirQualityDTO.getPollution().getAqius()).aqicn(simplifiedAirQualityDTO.getPollution().getAqicn()).tp(simplifiedAirQualityDTO.getWeather().getTp()).wd(simplifiedAirQualityDTO.getWeather().getWd()).ws(simplifiedAirQualityDTO.getWeather().getWs()).ic(simplifiedAirQualityDTO.getWeather().getIc()).
+                pr(simplifiedAirQualityDTO.getWeather().getPr()).hu(simplifiedAirQualityDTO.getWeather().getHu()).ts(simplifiedAirQualityDTO.getTs()).build();
+        cityAirDataRepository.save(cityAirData);
+    }
+    private SimplifiedAirQualityDTO convert(CityAirData cityAirData) {
+        SimplifiedAirQualityDTO simplifiedAirQualityDTO = new SimplifiedAirQualityDTO();
+        simplifiedAirQualityDTO.setCity(cityAirData.getCity());
+        simplifiedAirQualityDTO.setCountry(cityAirData.getCountry());
+        simplifiedAirQualityDTO.setState(cityAirData.getState());
+
+        double lat = Double.parseDouble(cityAirData.getLat());
+        double lng = Double.parseDouble(cityAirData.getLng());
+        simplifiedAirQualityDTO.setCoordinates(new double[]{lat, lng});
+
+        Pollution pollution = new Pollution();
+        pollution.setMainus(cityAirData.getMainus());
+        pollution.setMaincn(cityAirData.getMaincn());
+        pollution.setAqius(cityAirData.getAqius());
+        pollution.setAqicn(cityAirData.getAqicn());
+
+        Weather weather = new Weather();
+        weather.setTp(cityAirData.getTp());
+        weather.setWd(cityAirData.getWd());
+        weather.setWs(cityAirData.getWs());
+        weather.setIc(cityAirData.getIc());
+        weather.setPr(cityAirData.getPr());
+        weather.setHu(cityAirData.getHu());
+
+        simplifiedAirQualityDTO.setPollution(pollution);
+        simplifiedAirQualityDTO.setWeather(weather);
+        simplifiedAirQualityDTO.setTs(cityAirData.getTs());
+
+        return simplifiedAirQualityDTO;
+    }
+
     @Override
     public List<RankCityResponse> getPollutedCity() {
         try{
             List<PollutedCity> pollutedCities = pollutedCityRepository.findAll();
             List<RankCityResponse> pollutedCitiesList = new ArrayList<>();
+
             for (PollutedCity it : pollutedCities) {
-                StringBuilder temporaryUrl = new StringBuilder(url);
-                String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
-                        append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
-                HttpHeaders headers = new HttpHeaders();
 
-                ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
-                        HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
+                //StringBuilder temporaryUrl = new StringBuilder(url);
+                //String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
+                //        append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
+                //HttpHeaders headers = new HttpHeaders();
 
-                int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
-                int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
-                pollutedCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
-                System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+                //ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
+                //        HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
+
+                //int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
+                //int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
+                //pollutedCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
+                pollutedCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(it.getAqius()).aqicn(it.getAqicn()).build());
+                //System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
             }
             return pollutedCitiesList;
         } catch (Exception e) {
@@ -157,6 +204,8 @@ public class AirServiceImpl implements AirService {
                     SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").build());
         }
     }
+
+
 
     @Override
     public List<RankCityResponse> getCleanCity() {
