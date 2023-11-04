@@ -18,7 +18,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -290,7 +289,7 @@ public class AirServiceImpl implements AirService {
     }
 
 
-    private Object handleHttpClientError(HttpClientErrorException e) {
+    private void handleHttpClientError(HttpClientErrorException e) {
         HttpStatus statusCode = HttpStatus.resolve(e.getRawStatusCode());
         JsonNode jsonNode = e.getResponseBodyAs(JsonNode.class);
 
