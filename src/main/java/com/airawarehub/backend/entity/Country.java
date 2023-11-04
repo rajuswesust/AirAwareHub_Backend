@@ -20,4 +20,6 @@ public class Country {
     private Long id;
 
     private String name;
+
+    private String isoCode;
 }

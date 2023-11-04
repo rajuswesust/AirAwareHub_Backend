@@ -131,44 +131,60 @@ public class AirServiceImpl implements AirService {
 
     @Override
     public List<RankCityResponse> getPollutedCity() {
-        List<PollutedCity> pollutedCities = pollutedCityRepository.findAll();
-        List<RankCityResponse> pollutedCitiesList = new ArrayList<>();
-        for (PollutedCity it : pollutedCities) {
-            StringBuilder temporaryUrl = new StringBuilder(url);
-            String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
-                    append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
-            HttpHeaders headers = new HttpHeaders();
+        try{
+            List<PollutedCity> pollutedCities = pollutedCityRepository.findAll();
+            List<RankCityResponse> pollutedCitiesList = new ArrayList<>();
+            for (PollutedCity it : pollutedCities) {
+                StringBuilder temporaryUrl = new StringBuilder(url);
+                String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
+                        append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
+                HttpHeaders headers = new HttpHeaders();
 
-            ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
-                    HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
+                ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
+                        HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
 
-            int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
-            int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
-            pollutedCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
-            System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+                int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
+                int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
+                pollutedCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
+                System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+            }
+            return pollutedCitiesList;
+        } catch (Exception e) {
+            log.error("Something went wrong while getting value from IQAir API", e);
+            if (e instanceof HttpClientErrorException)
+                handleHttpClientError((HttpClientErrorException) e);
+            throw new ResponseStatusExceptionCustom(
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").build());
         }
-        return pollutedCitiesList;
     }
 
     @Override
     public List<RankCityResponse> getCleanCity() {
-        List<CleanCity> pollutedCities = cleanCityRepository.findAll();
-        List<RankCityResponse> cleanCitiesList = new ArrayList<>();
-        for (CleanCity it : pollutedCities) {
-            StringBuilder temporaryUrl = new StringBuilder(url);
-            String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
-                    append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
-            HttpHeaders headers = new HttpHeaders();
+        try{
+            List<CleanCity> pollutedCities = cleanCityRepository.findAll();
+            List<RankCityResponse> cleanCitiesList = new ArrayList<>();
+            for (CleanCity it : pollutedCities) {
+                StringBuilder temporaryUrl = new StringBuilder(url);
+                String urlCity = temporaryUrl.append("city?").append("city=").append(it.getName()).
+                        append("&state=").append(it.getState()).append("&country=").append(it.getCountry()).append("&key=").append(apiKey).toString();
+                HttpHeaders headers = new HttpHeaders();
 
-            ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
-                    HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
+                ResponseEntity<JsonNode> response = restTemplate.exchange(urlCity,
+                        HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
 
-            int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
-            int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
-            cleanCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
-            System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+                int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
+                int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
+                cleanCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
+                System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+            }
+            return cleanCitiesList;
+        } catch (Exception e) {
+            log.error("Something went wrong while getting value from IQAir API", e);
+            if (e instanceof HttpClientErrorException)
+                handleHttpClientError((HttpClientErrorException) e);
+            throw new ResponseStatusExceptionCustom(
+                    SimpleResponse.builder().message("Exception while calling endpoint of IQAir API for data").build());
         }
-        return cleanCitiesList;
     }
 
     public void getAllStates() {
@@ -206,7 +222,7 @@ public class AirServiceImpl implements AirService {
             countires.add(Country.builder().name(countryName).build());
         }
         System.out.println("size of list: " + countires.size());
-        countryRepository.saveAll(countires);
+        //countryRepository.saveAll(countires);
     }
 
 
