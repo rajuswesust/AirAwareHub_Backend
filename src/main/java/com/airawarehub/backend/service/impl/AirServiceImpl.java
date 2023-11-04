@@ -253,6 +253,19 @@ public class AirServiceImpl implements AirService {
         return cityRepository.findCitiesByNameContaining(cityName);
     }
 
+    @Override
+    public List<SimplifiedAirQualityDTO> getAllAvailableCity() {
+        List<CityAirData> list = cityAirDataRepository.findAll();
+
+        List<SimplifiedAirQualityDTO> data = new ArrayList<>();
+
+        for (CityAirData cityAirData: list) {
+            data.add(convert(cityAirData));
+        }
+
+        return data;
+    }
+
     private void saveStates(JsonNode responseBody, String countryName) {
         for (JsonNode stateNode : responseBody.get("data")) {
             System.out.println(stateNode);

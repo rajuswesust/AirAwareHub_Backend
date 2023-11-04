@@ -3,6 +3,7 @@ package com.airawarehub.backend.controller;
 import com.airawarehub.backend.payload.CityAirRequestDto;
 import com.airawarehub.backend.payload.CitySearchDto;
 import com.airawarehub.backend.payload.RankCityResponse;
+import com.airawarehub.backend.payload.SimplifiedAirQualityDTO;
 import com.airawarehub.backend.service.AirService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,4 +58,10 @@ public class AirDetailsController {
         airService.getAllStates();
         return new ResponseEntity<>("", HttpStatus.OK);
     }
+
+    @GetMapping("/map-view")
+    public ResponseEntity<List<SimplifiedAirQualityDTO>> getAllAvailableCity() {
+        return new ResponseEntity<>(airService.getAllAvailableCity(), HttpStatus.OK);
+    }
+
 }

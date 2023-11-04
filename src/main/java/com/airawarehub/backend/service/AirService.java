@@ -3,6 +3,7 @@ package com.airawarehub.backend.service;
 import com.airawarehub.backend.entity.City;
 import com.airawarehub.backend.payload.CityAirRequestDto;
 import com.airawarehub.backend.payload.RankCityResponse;
+import com.airawarehub.backend.payload.SimplifiedAirQualityDTO;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface AirService {
     //List<City> searchByCityPrefix(String cityName);
 
     List<City> searchByCity(String name);
+
+    List<SimplifiedAirQualityDTO> getAllAvailableCity();
 }
