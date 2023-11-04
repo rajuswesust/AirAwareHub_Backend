@@ -18,4 +18,9 @@ public class City {
     String longitude;
     String state;
     String country;
+
+    String totalGdp;
+    String gdpPerCapita;
+    String gdpGrowth;
+    String totalPopulation;
 }
