@@ -174,8 +174,10 @@ public class AirServiceImpl implements AirService {
 
                 int aqius = response.getBody().get("data").get("current").get("pollution").get("aqius").asInt();
                 int aqicn = response.getBody().get("data").get("current").get("pollution").get("aqicn").asInt();
-                //cleanCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
-                //System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
+                it.setAqicn(aqicn);
+                it.setAqius(aqius);
+                cleanCitiesList.add(RankCityResponse.builder().cityName(it.getName()).aqius(aqius).aqicn(aqicn).build());
+                System.out.println(it.getName() + ": " + aqius + ", " + aqicn);
             }
             return cleanCitiesList;
         } catch (Exception e) {
